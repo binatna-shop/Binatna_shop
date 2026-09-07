@@ -4270,9 +4270,9 @@ async function submitOrder(e){
       error  
     }=  
     await sb.rpc(  
-      'create_order',  
+      'place_order',  
       {  
-        p_customer_name:  
+        p_name:  
           n.value.trim(),  
   
         p_phone:  
