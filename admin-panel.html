@@ -92,7 +92,68 @@ function renderOrders(){const q=(document.getElementById('orderSearch')?.value||
 function openProduct(id){document.getElementById('productForm').reset();document.getElementById('productId').value='';document.getElementById('productModalTitle').textContent='إضافة منتج';if(id){const p=products.find(x=>Number(x.id)===Number(id));if(!p)return;document.getElementById('productModalTitle').textContent='تعديل المنتج';document.getElementById('productId').value=p.id;document.getElementById('pName').value=p.name||'';document.getElementById('pCategory').value=p.category||'ملابس';document.getElementById('pPrice').value=p.price||0;document.getElementById('pOldPrice').value=p.oldPrice||p.old_price||'';document.getElementById('pStock').value=p.stock||0;document.getElementById('pTag').value=p.tag||'';document.getElementById('pImage').value=p.image||'';document.getElementById('pImages').value=list(p.images).join(', ');document.getElementById('pSizes').value=list(p.sizes).join(', ');document.getElementById('pColors').value=list(p.colors).join(', ');document.getElementById('pDescription').value=p.description||''}document.getElementById('productModal').classList.add('show')}
 document.getElementById('productForm').onsubmit=async e=>{e.preventDefault();if(!sb)return;const id=document.getElementById('productId').value;const data={name:pName.value.trim(),category:pCategory.value,price:Number(pPrice.value||0),old_price:pOldPrice.value?Number(pOldPrice.value):null,stock:Number(pStock.value||0),tag:pTag.value.trim(),image:pImage.value.trim(),images:list(pImages.value),sizes:list(pSizes.value),colors:list(pColors.value),description:pDescription.value.trim()};try{const r=id?await sb.from('products').update(data).eq('id',id):await sb.from('products').insert(data);if(r.error)throw r.error;closeModal('productModal');await loadProducts();renderProducts();updateStats();alert('تم حفظ المنتج بنجاح')}catch(e){msg('productMsg','خطأ: '+e.message,true)}};
 async function deleteProduct(id){if(!confirm('هل أنت متأكد من حذف هذا المنتج؟'))return;const r=await sb.from('products').delete().eq('id',id);if(r.error){alert('تعذر الحذف: '+r.error.message);return}await loadProducts();renderProducts();updateStats()}
-function viewOrder(id){const o=orders.find(x=>Number(x.id)===Number(id));if(!o)return;document.getElementById('orderDetails').innerHTML=`<p><b>العميل:</b> ${esc(o.customer_name||o.p_name||'—')}</p><p><b>الهاتف:</b> ${esc(o.phone||o.p_phone||'—')}</p><p><b>الولاية:</b> ${esc(o.wilaya||o.p_wilaya||'—')}</p><p><b>العنوان:</b> ${esc(o.address||o.p_address||'—')}</p><p><b>الملاحظات:</b> ${esc(o.notes||o.p_notes||'—')}</p><p><b>المجموع:</b> ${Number(o.total||o.p_total||0).toLocaleString('ar-DZ')} دج</p><p><b>الحالة:</b> ${status(o.status)}</p><hr><pre style="white-space:pre-wrap;background:#f7fafc;padding:10px;border-radius:8px">${esc(JSON.stringify(o.items||o.p_items||[],null,2))}</pre>`;document.getElementById('orderModal').classList.add('show')}
+async function viewOrder(id){
+  const o=orders.find(x=>Number(x.id)===Number(id));
+  if(!o)return;
+
+  let items=o.items||o.p_items||[];
+
+  if(typeof items==='string'){
+    try{items=JSON.parse(items)}catch(e){items=[]}
+  }
+
+  let itemsHtml='';
+
+  if(Array.isArray(items)&&items.length){
+    itemsHtml='<hr><h3 style="margin:12px 0">المنتجات المطلوبة</h3>';
+
+    for(const item of items){
+      const product=products.find(p=>Number(p.id)===Number(item.id));
+
+      const name=product?.name||`منتج رقم ${item.id}`;
+      const price=Number(product?.price||0);
+      const qty=Number(item.qty||item.quantity||1);
+      const lineTotal=price*qty;
+
+      itemsHtml+=`
+        <div style="background:#f7fafc;border:1px solid #e5edf5;border-radius:10px;padding:12px;margin:8px 0">
+          <div style="font-weight:800;font-size:14px;margin-bottom:8px">
+            ${esc(name)}
+          </div>
+          <div>السعر: <b>${price.toLocaleString('ar-DZ')} دج</b></div>
+          <div>الكمية: <b>${qty}</b></div>
+          <div>المقاس: <b>${esc(item.size||'—')}</b></div>
+          <div>اللون: <b>${esc(item.color||'—')}</b></div>
+          <div style="margin-top:6px">
+            مجموع المنتج: <b>${lineTotal.toLocaleString('ar-DZ')} دج</b>
+          </div>
+        </div>
+      `;
+    }
+  }else{
+    itemsHtml='<hr><p>لا توجد منتجات في هذا الطلب.</p>';
+  }
+
+  document.getElementById('orderDetails').innerHTML=`
+    <p><b>العميل:</b> ${esc(o.customer_name||'—')}</p>
+    <p><b>الهاتف:</b> ${esc(o.phone||'—')}</p>
+    <p><b>الولاية:</b> ${esc(o.wilaya||'—')}</p>
+    <p><b>العنوان:</b> ${esc(o.address||'—')}</p>
+    <p><b>الملاحظات:</b> ${esc(o.notes||'—')}</p>
+
+    ${itemsHtml}
+
+    <hr>
+
+    <p><b>سعر المنتجات:</b> ${Number(o.subtotal||0).toLocaleString('ar-DZ')} دج</p>
+    <p><b>التوصيل:</b> ${Number(o.delivery||0).toLocaleString('ar-DZ')} دج</p>
+    <p><b>المجموع النهائي:</b> ${Number(o.total||0).toLocaleString('ar-DZ')} دج</p>
+    <p><b>الحالة:</b> ${status(o.status)}</p>
+  `;
+
+  document.getElementById('orderModal').classList.add('show');
+}
+
 async function setOrderStatus(id,statusValue){const r=await sb.from('orders').update({status:statusValue}).eq('id',id);if(r.error){alert('تعذر تحديث الحالة: '+r.error.message);return}await loadOrders();renderOrders();renderRecent()}
 document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();if(!ready){msg('loginMsg','أدخل BINATNA_SUPABASE_URL و BINATNA_SUPABASE_ANON_KEY في supabase-config.js',true);return}try{const r=await sb.auth.signInWithPassword({email:email.value,password:password.value});if(r.error)throw r.error;await boot()}catch(e){msg('loginMsg','فشل الدخول: '+e.message,true)}};
 document.getElementById('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
