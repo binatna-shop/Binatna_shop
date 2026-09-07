@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binatna Shop | لوحة الإدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+:root{--blue:#2563eb;--blue2:#1e40af;--bg:#f4f8fc;--card:#fff;--ink:#10233f;--muted:#718198;--line:#d9e6f2;--danger:#dc2626;--green:#059669;}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}a{text-decoration:none;color:inherit}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eaf5ff,#f8fbff)}.login-card{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 20px 60px #183b5d18}.logo{text-align:center;font-size:26px;font-weight:900;margin-bottom:8px}.logo span{color:var(--blue)}.subtitle{text-align:center;color:var(--muted);font-size:12px;margin-bottom:25px}
+label{display:block;font-size:11px;font-weight:800;margin:0 0 7px}.field{margin-bottom:14px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:#fbfdff;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2563eb12}.btn{padding:11px 16px;border-radius:8px;font-weight:800;font-size:11px}.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue2)}.secondary{background:#eaf3fb;color:var(--ink)}.danger{background:#fee2e2;color:var(--danger)}.green{background:#dff7ee;color:#047857}.message{font-size:11px;padding:10px;border-radius:8px;margin-top:10px;background:#fff3cd;color:#765b00}.message.error{background:#fee2e2;color:#991b1b}
+.app{display:none;min-height:100vh}.sidebar{position:fixed;right:0;top:0;bottom:0;width:245px;background:#102b4d;color:#fff;padding:24px 15px;z-index:10}.side-logo{font-weight:900;font-size:21px;text-align:center;margin-bottom:28px}.side-logo span{color:#73b5ff}.navbtn{width:100%;text-align:right;background:transparent;color:#d8e7f5;padding:13px 14px;border-radius:9px;font-size:11px;font-weight:800;margin:3px 0}.navbtn:hover,.navbtn.active{background:#ffffff12;color:#fff}.navbtn i{width:24px}.logout{position:absolute;bottom:20px;right:15px;width:calc(100% - 30px)}
+.main{margin-right:245px;padding:25px;max-width:1500px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:24px}.top h1{font-size:24px;margin:0}.top p{font-size:11px;color:var(--muted);margin:6px 0 0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.stat{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px}.stat small{color:var(--muted);font-size:10px}.stat strong{display:block;font-size:24px;margin-top:8px}.panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.panel-head h2{font-size:15px;margin:0}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:750px}th,td{text-align:right;padding:12px 9px;border-bottom:1px solid #edf2f7;font-size:10px;vertical-align:middle}th{color:var(--muted);font-weight:800;background:#f8fbfe}td strong{font-size:11px}.thumb{width:48px;height:48px;border-radius:7px;object-fit:cover;background:#eaf3fb}.actions{display:flex;gap:5px;flex-wrap:wrap}.mini{padding:7px 9px;border-radius:6px;font-size:9px;font-weight:800}.empty{text-align:center;padding:35px;color:var(--muted);font-size:11px}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:13px}.toolbar input{max-width:320px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.modal{position:fixed;inset:0;background:#081b30aa;display:none;place-items:center;padding:15px;z-index:50}.modal.show{display:grid}.modal-card{background:#fff;border-radius:14px;width:min(760px,100%);max-height:92vh;overflow:auto;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.modal-head h2{font-size:17px;margin:0}.close{width:32px;height:32px;border-radius:50%;background:#edf4fa}.form-actions{display:flex;gap:8px;justify-content:flex-start;margin-top:17px}.order-details{line-height:2;font-size:11px}.status{display:inline-block;padding:5px 8px;border-radius:20px;font-size:8px;font-weight:900;background:#eaf3fb}.status.new{background:#dbeafe;color:#1d4ed8}.status.confirmed{background:#dcfce7;color:#15803d}.status.cancelled{background:#fee2e2;color:#b91c1c}
+@media(max-width:900px){.sidebar{width:210px}.main{margin-right:210px}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.sidebar{position:static;width:100%;height:auto;padding:12px}.side-logo{margin:4px 0 8px}.navs{display:flex;overflow:auto;gap:5px}.navbtn{width:auto;white-space:nowrap}.logout{position:static;width:auto;margin-top:5px}.main{margin-right:0;padding:14px}.top{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.panel{padding:13px}.toolbar{flex-wrap:wrap}.toolbar input{max-width:none}.modal-card{padding:16px}}
+@media(max-width:420px){.stats{grid-template-columns:1fr}.stat strong{font-size:21px}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login">
+  <div class="login-card">
+    <div class="logo">Binatna <span>Shop</span></div>
+    <div class="subtitle">لوحة إدارة المتجر — دخول خاص بالإدارة فقط</div>
+    <form id="loginForm">
+      <div class="field"><label>البريد الإلكتروني</label><input id="email" type="email" required autocomplete="username"></div>
+      <div class="field"><label>كلمة المرور</label><input id="password" type="password" required autocomplete="current-password"></div>
+      <button class="btn primary" style="width:100%" type="submit"><i class="fa-solid fa-lock"></i> دخول إلى لوحة الإدارة</button>
+    </form>
+    <div id="loginMsg" class="message hidden"></div>
+  </div>
+</div>
+
+<div id="app" class="app">
+  <aside class="sidebar">
+    <div class="side-logo">Binatna <span>Shop</span></div>
+    <div class="navs">
+      <button class="navbtn active" data-page="dashboard"><i class="fa-solid fa-chart-line"></i> الرئيسية</button>
+      <button class="navbtn" data-page="products"><i class="fa-solid fa-box"></i> المنتجات</button>
+      <button class="navbtn" data-page="orders"><i class="fa-solid fa-cart-shopping"></i> الطلبات</button>
+    </div>
+    <button id="logoutBtn" class="btn danger logout"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+  </aside>
+  <main class="main">
+    <div class="top"><div><h1 id="pageTitle">لوحة التحكم</h1><p id="adminEmail"></p></div><button class="btn secondary" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> تحديث</button></div>
+    <section id="dashboardPage" class="page">
+      <div class="stats"><div class="stat"><small>عدد المنتجات</small><strong id="statProducts">0</strong></div><div class="stat"><small>إجمالي الطلبات</small><strong id="statOrders">0</strong></div><div class="stat"><small>طلبات جديدة</small><strong id="statNew">0</strong></div><div class="stat"><small>منتجات المخزون المنخفض</small><strong id="statLow">0</strong></div></div>
+      <div class="panel"><div class="panel-head"><h2>آخر الطلبات</h2><button class="btn secondary" onclick="showPage('orders')">كل الطلبات</button></div><div id="recentOrders"></div></div>
+    </section>
+    <section id="productsPage" class="page hidden">
+      <div class="panel"><div class="panel-head"><h2>إدارة المنتجات</h2><button class="btn primary" onclick="openProduct()"><i class="fa-solid fa-plus"></i> إضافة منتج</button></div><div class="toolbar"><input id="productSearch" placeholder="بحث عن منتج..." oninput="renderProducts()"></div><div class="table-wrap"><table><thead><tr><th>الصورة</th><th>المنتج</th><th>الفئة</th><th>السعر</th><th>المخزون</th><th>الإجراء</th></tr></thead><tbody id="productsBody"></tbody></table></div></div>
+    </section>
+    <section id="ordersPage" class="page hidden">
+      <div class="panel"><div class="panel-head"><h2>إدارة الطلبات</h2><button class="btn secondary" onclick="loadOrders()">تحديث الطلبات</button></div><div class="toolbar"><input id="orderSearch" placeholder="بحث بالاسم أو الهاتف أو الولاية..." oninput="renderOrders()"></div><div class="table-wrap"><table><thead><tr><th>#</th><th>العميل</th><th>الهاتف</th><th>الولاية</th><th>المجموع</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+    </section>
+  </main>
+</div>
+
+<div id="productModal" class="modal"><div class="modal-card"><div class="modal-head"><h2 id="productModalTitle">إضافة منتج</h2><button class="close" onclick="closeModal('productModal')">×</button></div><form id="productForm"><input type="hidden" id="productId"><div class="form-grid">
+<div class="field"><label>اسم المنتج</label><input id="pName" required></div><div class="field"><label>الفئة</label><select id="pCategory"><option>ملابس</option><option>عطور</option><option>إكسسوارات</option><option>أخرى</option></select></div>
+<div class="field"><label>السعر (دج)</label><input id="pPrice" type="number" min="0" required></div><div class="field"><label>السعر القديم (اختياري)</label><input id="pOldPrice" type="number" min="0"></div>
+<div class="field"><label>المخزون</label><input id="pStock" type="number" min="0" value="0"></div><div class="field"><label>الوسم</label><input id="pTag" placeholder="جديد / الأكثر طلباً"></div>
+<div class="field full"><label>رابط الصورة الرئيسية</label><input id="pImage" type="url" placeholder="https://..."></div><div class="field full"><label>روابط الصور الإضافية (افصل بينها بفاصلة)</label><input id="pImages" placeholder="https://..., https://..."></div>
+<div class="field"><label>المقاسات (افصل بينها بفاصلة)</label><input id="pSizes" placeholder="S, M, L, XL"></div><div class="field"><label>الألوان (افصل بينها بفاصلة)</label><input id="pColors" placeholder="أسود, أبيض"></div>
+<div class="field full"><label>الوصف</label><textarea id="pDescription" rows="4"></textarea></div>
+</div><div id="productMsg" class="message hidden"></div><div class="form-actions"><button class="btn primary" type="submit">حفظ المنتج</button><button class="btn secondary" type="button" onclick="closeModal('productModal')">إلغاء</button></div></form></div></div>
+
+<div id="orderModal" class="modal"><div class="modal-card"><div class="modal-head"><h2>تفاصيل الطلب</h2><button class="close" onclick="closeModal('orderModal')">×</button></div><div id="orderDetails" class="order-details"></div></div></div>
+
+<script>
+const ready=Boolean(window.BINATNA_SUPABASE_URL&&window.BINATNA_SUPABASE_ANON_KEY&&!window.BINATNA_SUPABASE_URL.includes('YOUR_PROJECT_REF')&&!window.BINATNA_SUPABASE_ANON_KEY.includes('YOUR_SUPABASE'));
+const sb=ready?window.supabase.createClient(window.BINATNA_SUPABASE_URL,window.BINATNA_SUPABASE_ANON_KEY):null;
+let products=[],orders=[];
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const list=v=>Array.isArray(v)?v:(typeof v==='string'?v.split(',').map(x=>x.trim()).filter(Boolean):[]);
+function msg(id,text,error=false){const e=document.getElementById(id);e.textContent=text;e.classList.remove('hidden');e.classList.toggle('error',error)}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showPage(page){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));document.getElementById(page+'Page').classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===page));document.getElementById('pageTitle').textContent=page==='dashboard'?'لوحة التحكم':page==='products'?'المنتجات':'الطلبات';if(page==='products')renderProducts();if(page==='orders')renderOrders()}
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+async function loadProducts(){if(!sb)return;const r=await sb.from('products').select('*').order('id',{ascending:false});if(r.error)throw r.error;products=r.data||[]}
+async function loadOrders(){if(!sb)return;const r=await sb.from('orders').select('*').order('created_at',{ascending:false});if(r.error){console.error(r.error);orders=[];return}orders=r.data||[];renderOrders();updateStats()}
+async function loadAll(){if(!ready){msg('loginMsg','أدخل بيانات Supabase في supabase-config.js أولاً',true);return}try{await loadProducts();await loadOrders();renderProducts();renderOrders();updateStats();renderRecent()}catch(e){alert('تعذر تحميل البيانات: '+e.message)}}
+function updateStats(){document.getElementById('statProducts').textContent=products.length;document.getElementById('statOrders').textContent=orders.length;document.getElementById('statNew').textContent=orders.filter(o=>['جديد','new','pending'].includes(String(o.status||'new'))).length;document.getElementById('statLow').textContent=products.filter(p=>Number(p.stock||0)<=5).length}
+function renderRecent(){const a=orders.slice(0,5);document.getElementById('recentOrders').innerHTML=a.length?'<div class="table-wrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>المجموع</th><th>الحالة</th></tr></thead><tbody>'+a.map(o=>`<tr><td>${esc(o.customer_name||o.p_name||'—')}</td><td>${esc(o.phone||o.p_phone||'—')}</td><td>${Number(o.total||o.p_total||0).toLocaleString('ar-DZ')} دج</td><td>${status(o.status)}</td></tr>`).join('')+'</tbody></table></div>':'<div class="empty">لا توجد طلبات بعد</div>'}
+function renderProducts(){const q=(document.getElementById('productSearch')?.value||'').toLowerCase();const a=products.filter(p=>`${p.name||''} ${p.category||''}`.toLowerCase().includes(q));document.getElementById('productsBody').innerHTML=a.length?a.map(p=>`<tr><td><img class="thumb" src="${esc(p.image||'')}" onerror="this.style.display='none'"></td><td><strong>${esc(p.name)}</strong></td><td>${esc(p.category||'—')}</td><td>${Number(p.price||0).toLocaleString('ar-DZ')} دج</td><td>${Number(p.stock||0)}</td><td><div class="actions"><button class="mini secondary" onclick="openProduct(${Number(p.id)})">تعديل</button><button class="mini danger" onclick="deleteProduct(${Number(p.id)})">حذف</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty">لا توجد منتجات</td></tr>'}
+function status(s){const x=String(s||'new');const cls=x==='confirmed'||x==='مؤكد'?'confirmed':x==='cancelled'||x==='ملغى'?'cancelled':'new';return `<span class="status ${cls}">${esc(s||'جديد')}</span>`}
+function renderOrders(){const q=(document.getElementById('orderSearch')?.value||'').toLowerCase();const a=orders.filter(o=>`${o.customer_name||o.p_name||''} ${o.phone||o.p_phone||''} ${o.wilaya||o.p_wilaya||''}`.toLowerCase().includes(q));document.getElementById('ordersBody').innerHTML=a.length?a.map(o=>`<tr><td>${esc(o.id||'—')}</td><td>${esc(o.customer_name||o.p_name||'—')}</td><td>${esc(o.phone||o.p_phone||'—')}</td><td>${esc(o.wilaya||o.p_wilaya||'—')}</td><td>${Number(o.total||o.p_total||0).toLocaleString('ar-DZ')} دج</td><td>${status(o.status)}</td><td>${o.created_at?new Date(o.created_at).toLocaleString('ar-DZ'):'—'}</td><td><div class="actions"><button class="mini secondary" onclick="viewOrder(${Number(o.id)})">عرض</button><button class="mini green" onclick="setOrderStatus(${Number(o.id)},'confirmed')">تأكيد</button><button class="mini danger" onclick="setOrderStatus(${Number(o.id)},'cancelled')">إلغاء</button></div></td></tr>`).join(''):'<tr><td colspan="8" class="empty">لا توجد طلبات</td></tr>'}
+function openProduct(id){document.getElementById('productForm').reset();document.getElementById('productId').value='';document.getElementById('productModalTitle').textContent='إضافة منتج';if(id){const p=products.find(x=>Number(x.id)===Number(id));if(!p)return;document.getElementById('productModalTitle').textContent='تعديل المنتج';document.getElementById('productId').value=p.id;document.getElementById('pName').value=p.name||'';document.getElementById('pCategory').value=p.category||'ملابس';document.getElementById('pPrice').value=p.price||0;document.getElementById('pOldPrice').value=p.oldPrice||p.old_price||'';document.getElementById('pStock').value=p.stock||0;document.getElementById('pTag').value=p.tag||'';document.getElementById('pImage').value=p.image||'';document.getElementById('pImages').value=list(p.images).join(', ');document.getElementById('pSizes').value=list(p.sizes).join(', ');document.getElementById('pColors').value=list(p.colors).join(', ');document.getElementById('pDescription').value=p.description||''}document.getElementById('productModal').classList.add('show')}
+document.getElementById('productForm').onsubmit=async e=>{e.preventDefault();if(!sb)return;const id=document.getElementById('productId').value;const data={name:pName.value.trim(),category:pCategory.value,price:Number(pPrice.value||0),old_price:pOldPrice.value?Number(pOldPrice.value):null,stock:Number(pStock.value||0),tag:pTag.value.trim(),image:pImage.value.trim(),images:list(pImages.value),sizes:list(pSizes.value),colors:list(pColors.value),description:pDescription.value.trim()};try{const r=id?await sb.from('products').update(data).eq('id',id):await sb.from('products').insert(data);if(r.error)throw r.error;closeModal('productModal');await loadProducts();renderProducts();updateStats();alert('تم حفظ المنتج بنجاح')}catch(e){msg('productMsg','خطأ: '+e.message,true)}};
+async function deleteProduct(id){if(!confirm('هل أنت متأكد من حذف هذا المنتج؟'))return;const r=await sb.from('products').delete().eq('id',id);if(r.error){alert('تعذر الحذف: '+r.error.message);return}await loadProducts();renderProducts();updateStats()}
+function viewOrder(id){const o=orders.find(x=>Number(x.id)===Number(id));if(!o)return;document.getElementById('orderDetails').innerHTML=`<p><b>العميل:</b> ${esc(o.customer_name||o.p_name||'—')}</p><p><b>الهاتف:</b> ${esc(o.phone||o.p_phone||'—')}</p><p><b>الولاية:</b> ${esc(o.wilaya||o.p_wilaya||'—')}</p><p><b>العنوان:</b> ${esc(o.address||o.p_address||'—')}</p><p><b>الملاحظات:</b> ${esc(o.notes||o.p_notes||'—')}</p><p><b>المجموع:</b> ${Number(o.total||o.p_total||0).toLocaleString('ar-DZ')} دج</p><p><b>الحالة:</b> ${status(o.status)}</p><hr><pre style="white-space:pre-wrap;background:#f7fafc;padding:10px;border-radius:8px">${esc(JSON.stringify(o.items||o.p_items||[],null,2))}</pre>`;document.getElementById('orderModal').classList.add('show')}
+async function setOrderStatus(id,statusValue){const r=await sb.from('orders').update({status:statusValue}).eq('id',id);if(r.error){alert('تعذر تحديث الحالة: '+r.error.message);return}await loadOrders();renderOrders();renderRecent()}
+document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();if(!ready){msg('loginMsg','أدخل BINATNA_SUPABASE_URL و BINATNA_SUPABASE_ANON_KEY في supabase-config.js',true);return}try{const r=await sb.auth.signInWithPassword({email:email.value,password:password.value});if(r.error)throw r.error;await boot()}catch(e){msg('loginMsg','فشل الدخول: '+e.message,true)}};
+document.getElementById('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+async function boot(){const {data:{session}}=await sb.auth.getSession();if(!session){document.getElementById('loginView').style.display='grid';document.getElementById('app').style.display='none';return}document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';document.getElementById('adminEmail').textContent=session.user.email||'';showPage('dashboard');await loadAll()}
+boot();
+</script>
+</body>
+</html>
